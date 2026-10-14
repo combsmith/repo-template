@@ -2,7 +2,7 @@
 # Drift & compliance regression guard for the auto-rebase thin caller stub.
 #
 # .github/workflows/auto-rebase.yml is copied VERBATIM from the canonical org
-# template (petry-projects/.github → standards/workflows/auto-rebase.yml) and must
+# template (combsmith/.github → standards/workflows/auto-rebase.yml) and must
 # stay byte-identical across every adopting repo. The `uses:` ref is pinned to the
 # `auto-rebase/v2-stable` channel — the only permitted channel; never repoint it to
 # a bare `auto-rebase/stable`, @main, a SHA, or a frozen @vN. Any other diff is
@@ -26,7 +26,7 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/auto-rebase.yml"
 }
 
 @test "uses: ref is pinned to the auto-rebase/v2-stable channel" {
-  grep -qF 'uses: petry-projects/.github/.github/workflows/auto-rebase-reusable.yml@auto-rebase/v2-stable' "$STUB"
+  grep -qF 'uses: combsmith/.github/.github/workflows/auto-rebase-reusable.yml@auto-rebase/v2-stable' "$STUB"
 }
 
 @test "uses: ref is not repointed to bare stable, @main, a SHA, or a frozen @vN" {
@@ -65,7 +65,7 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/auto-rebase.yml"
 
 @test "auto-rebase stub is byte-identical to the canonical template" {
   # Inline canonical snapshot — update this heredoc whenever the central
-  # template (petry-projects/.github/standards/workflows/auto-rebase.yml) changes.
+  # template (combsmith/.github/standards/workflows/auto-rebase.yml) changes.
   # The committed stub has NO trailing newline, so capture via command
   # substitution (strips trailing newlines) + printf '%s' (adds none) to stay
   # byte-faithful to the committed production stub.
@@ -73,9 +73,9 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/auto-rebase.yml"
   canon="$(mktemp)"
   printf '%s' "$(cat << 'CANONICAL'
 # ─────────────────────────────────────────────────────────────────────────────
-# SOURCE OF TRUTH: petry-projects/.github/standards/workflows/auto-rebase.yml
-# Standard:        petry-projects/.github/standards/ci-standards.md
-# Reusable:        petry-projects/.github/.github/workflows/auto-rebase-reusable.yml
+# SOURCE OF TRUTH: combsmith/.github/standards/workflows/auto-rebase.yml
+# Standard:        combsmith/.github/standards/ci-standards.md
+# Reusable:        combsmith/.github/.github/workflows/auto-rebase-reusable.yml
 #
 # AGENTS — READ BEFORE EDITING:
 #   • This file is a THIN CALLER STUB. All branch-update logic lives in the
@@ -122,7 +122,7 @@ jobs:
     permissions:
       contents: write      # update-branch via GITHUB_TOKEN (may touch .github/workflows/)
       pull-requests: write # post comments on PRs
-    uses: petry-projects/.github/.github/workflows/auto-rebase-reusable.yml@auto-rebase/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
+    uses: combsmith/.github/.github/workflows/auto-rebase-reusable.yml@auto-rebase/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
     secrets: inherit  # NOSONAR(githubactions:S7635) first-party trusted reusable
 CANONICAL
 )" > "$canon"

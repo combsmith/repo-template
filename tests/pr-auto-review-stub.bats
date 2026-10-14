@@ -2,7 +2,7 @@
 # Drift & compliance regression guard for the pr-auto-review thin caller stub.
 #
 # .github/workflows/pr-auto-review.yml is a THIN CALLER STUB whose readiness-gate
-# logic lives entirely in the central reusable (petry-projects/.github →
+# logic lives entirely in the central reusable (combsmith/.github →
 # .github/workflows/pr-auto-review-reusable.yml). Its `uses:` channel ref, trigger
 # event types, and job `permissions:` block are drift-protected and MUST NOT be
 # edited in the caller (see the file's own "AGENTS — READ BEFORE EDITING" banner
@@ -53,7 +53,7 @@ PYEOF
 @test "uses: ref is pinned to the pr-auto-review/v1-stable channel" {
   # Match the actual `uses:` field (not comments) and anchor the end so a suffix
   # like @pr-auto-review/v1-stable-rogue cannot slip through.
-  grep -qE '^\s+uses:\s+petry-projects/\.github/\.github/workflows/pr-auto-review-reusable\.yml@pr-auto-review/v1-stable(\s|$|#)' "$STUB"
+  grep -qE '^\s+uses:\s+combsmith/\.github/\.github/workflows/pr-auto-review-reusable\.yml@pr-auto-review/v1-stable(\s|$|#)' "$STUB"
 }
 
 @test "uses: ref is not repointed to @main, a SHA, or a frozen @vN" {

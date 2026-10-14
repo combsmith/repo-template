@@ -3,7 +3,7 @@
 #
 # .github/workflows/dependency-audit.yml is a THIN CALLER STUB whose ecosystem
 # detection and vulnerability-audit logic live entirely in the central reusable
-# (petry-projects/.github → .github/workflows/dependency-audit-reusable.yml). It
+# (combsmith/.github → .github/workflows/dependency-audit-reusable.yml). It
 # is adopted VERBATIM: its own "AGENTS — READ BEFORE EDITING" banner says you may
 # change nothing in normal use, and MUST NOT change the trigger events, the
 # `uses:` line, or the job name (the job feeds the required status check). Any
@@ -31,7 +31,7 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/dependency-audit.yml"
 
 @test "dependency-audit stub is byte-identical to the canonical template" {
   # Inline canonical snapshot — update this heredoc whenever the central template
-  # (petry-projects/.github/standards/workflows/dependency-audit.yml) changes.
+  # (combsmith/.github/standards/workflows/dependency-audit.yml) changes.
   local canon
   canon="$(mktemp)"
   # The committed stub has NO trailing newline, so emit the heredoc with its
@@ -39,9 +39,9 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/dependency-audit.yml"
   # committed, production stub that the fleet stub-drift monitor compares SHAs against.
   printf '%s' "$(cat << 'CANONICAL'
 # ─────────────────────────────────────────────────────────────────────────────
-# SOURCE OF TRUTH: petry-projects/.github/standards/workflows/dependency-audit.yml
-# Standard:        petry-projects/.github/standards/ci-standards.md#7-dependency-audit-dependency-audityml
-# Reusable:        petry-projects/.github/.github/workflows/dependency-audit-reusable.yml
+# SOURCE OF TRUTH: combsmith/.github/standards/workflows/dependency-audit.yml
+# Standard:        combsmith/.github/standards/ci-standards.md#7-dependency-audit-dependency-audityml
+# Reusable:        combsmith/.github/.github/workflows/dependency-audit-reusable.yml
 #
 # AGENTS — READ BEFORE EDITING:
 #   • This file is a THIN CALLER STUB. All ecosystem-detection and audit logic
@@ -75,7 +75,7 @@ permissions:
 
 jobs:
   dependency-audit:
-    uses: petry-projects/.github/.github/workflows/dependency-audit-reusable.yml@dependency-audit/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
+    uses: combsmith/.github/.github/workflows/dependency-audit-reusable.yml@dependency-audit/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
 CANONICAL
 )" > "$canon"
   run diff -u "$canon" "$STUB"
@@ -90,7 +90,7 @@ CANONICAL
 @test "uses: ref is pinned to the dependency-audit/v2-stable channel" {
   # Match the actual `uses:` field (not comments) and anchor the end so a suffix
   # like @dependency-audit/v2-stable-rogue cannot slip through.
-  grep -qE '^[[:space:]]+uses:[[:space:]]+petry-projects/\.github/\.github/workflows/dependency-audit-reusable\.yml@dependency-audit/v2-stable([[:space:]]|$|#)' "$STUB"
+  grep -qE '^[[:space:]]+uses:[[:space:]]+combsmith/\.github/\.github/workflows/dependency-audit-reusable\.yml@dependency-audit/v2-stable([[:space:]]|$|#)' "$STUB"
 }
 
 @test "uses: ref is not repointed to @main, a SHA, or a frozen @vN" {

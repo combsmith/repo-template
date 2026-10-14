@@ -4,7 +4,7 @@
 #
 # .github/workflows/pr-auto-review.yml is a THIN CALLER STUB. Its `on:` triggers,
 # `permissions:` grants, and `concurrency:` block are owned centrally by
-# petry-projects/.github → standards/workflows/pr-auto-review.yml and are NOT
+# combsmith/.github → standards/workflows/pr-auto-review.yml and are NOT
 # repo-adjustable (only the documented `with:` inputs and the tier channel pin
 # may differ per repo). This guard pins the centrally-owned `concurrency:`
 # surface so it cannot silently drift back out of sync.

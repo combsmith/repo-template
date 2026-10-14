@@ -2,7 +2,7 @@
 # Drift & compliance regression guard for the agent-shield thin caller stub.
 #
 # .github/workflows/agent-shield.yml is copied VERBATIM from the canonical
-# org template (petry-projects/.github → standards/workflows/agent-shield.yml)
+# org template (combsmith/.github → standards/workflows/agent-shield.yml)
 # and must stay byte-identical across every adopting repo, modulo the per-repo
 # channel pin on the `uses:` ref. Any other diff is drift — the silent-revert
 # class of failure the fleet stub-drift monitor exists to catch (fleet_stub_drift.sh).
@@ -24,7 +24,7 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/agent-shield.yml"
 
 @test "agent-shield stub is byte-identical to the canonical template" {
   # Inline canonical snapshot — update this heredoc whenever the central template
-  # (petry-projects/.github/standards/workflows/agent-shield.yml) changes.
+  # (combsmith/.github/standards/workflows/agent-shield.yml) changes.
   local canon
   canon="$(mktemp)"
   # The committed stub has NO trailing newline, so emit the heredoc with its
@@ -32,9 +32,9 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/agent-shield.yml"
   # committed, production stub that the fleet stub-drift monitor compares SHAs against.
   printf '%s' "$(cat << 'CANONICAL'
 # ─────────────────────────────────────────────────────────────────────────────
-# SOURCE OF TRUTH: petry-projects/.github/standards/workflows/agent-shield.yml
-# Standard:        petry-projects/.github/standards/agent-standards.md
-# Reusable:        petry-projects/.github/.github/workflows/agent-shield-reusable.yml
+# SOURCE OF TRUTH: combsmith/.github/standards/workflows/agent-shield.yml
+# Standard:        combsmith/.github/standards/agent-standards.md
+# Reusable:        combsmith/.github/.github/workflows/agent-shield-reusable.yml
 #
 # AGENTS — READ BEFORE EDITING:
 #   • This file is a THIN CALLER STUB. The AgentShield CLI scan and the
@@ -68,7 +68,7 @@ permissions:
 
 jobs:
   agent-shield:
-    uses: petry-projects/.github/.github/workflows/agent-shield-reusable.yml@agent-shield/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
+    uses: combsmith/.github/.github/workflows/agent-shield-reusable.yml@agent-shield/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
 CANONICAL
 )" > "$canon"
   run diff -u "$canon" "$STUB"
@@ -81,7 +81,7 @@ CANONICAL
 }
 
 @test "uses: ref is pinned to the agent-shield/v2-stable channel" {
-  grep -qF 'uses: petry-projects/.github/.github/workflows/agent-shield-reusable.yml@agent-shield/v2-stable' "$STUB"
+  grep -qF 'uses: combsmith/.github/.github/workflows/agent-shield-reusable.yml@agent-shield/v2-stable' "$STUB"
 }
 
 @test "uses: ref is not repointed to @main, a SHA, or a frozen @vN" {

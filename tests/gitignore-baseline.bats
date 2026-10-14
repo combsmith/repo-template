@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 # Compliance regression guard for the .gitignore Standard
-# (petry-projects/.github → standards/gitignore-standard.md#managed-block-markers).
+# (combsmith/.github → standards/gitignore-standard.md#managed-block-markers).
 #
 # Every repo's .gitignore MUST open with the org-managed L1 "secrets baseline"
 # block, copied VERBATIM (markers included) from the org /.gitignore. The weekly
@@ -19,14 +19,14 @@
 GITIGNORE="${BATS_TEST_DIRNAME}/../.gitignore"
 
 # Canonical marker lines — must match push-protection.sh byte-for-byte.
-BEGIN_MARKER='# >>> BEGIN petry-projects secrets baseline (managed by .github — do not edit) >>>'
-END_MARKER='# <<< END petry-projects secrets baseline <<<'
+BEGIN_MARKER='# >>> BEGIN combsmith secrets baseline (managed by .github — do not edit) >>>'
+END_MARKER='# <<< END combsmith secrets baseline <<<'
 
 # SHA-256 of the org canonical L1 span (BEGIN … END markers inclusive), computed
 # the same way pp_check_gitignore_baseline does: extract the span, then
 # `printf '%s' "$span" | sha256sum` (command substitution strips the trailing
 # newline, so the hash is trailing-newline tolerant).
-GITIGNORE_L1_SHA256='1d4a83d95f8ee135aee79215b022dce1ac1cf8e049642ef9e82f1a80b691bc37'
+GITIGNORE_L1_SHA256='5923c09c4183e1c104f3c04f57eba4d86ae5547913321c6d8bc053bf81d95a57'
 
 # Extract the L1 secrets-baseline span (markers inclusive) from stdin, mirroring
 # pp_extract_baseline_block. Prints nothing and exits non-zero if the block is
