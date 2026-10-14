@@ -2,7 +2,7 @@
 # Compliance regression guard for ci.yml concurrency scoping (issue #208).
 #
 # The org CI standard now mandates SHA-scoped concurrency. Source of truth:
-# petry-projects/.github standards/ci-standards.md §1 ("Why SHA-scoped
+# combsmith/.github standards/ci-standards.md §1 ("Why SHA-scoped
 # concurrency?") and standards/workflows/ci.yml, which require:
 #
 #   concurrency:

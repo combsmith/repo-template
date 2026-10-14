@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 # Compliance regression guard for the .gitignore Standard
-# (petry-projects/.github → standards/gitignore-standard.md#managed-block-markers).
+# (combsmith/.github → standards/gitignore-standard.md#managed-block-markers).
 #
 # Every repo's .gitignore MUST open with the org-managed L1 "secrets baseline"
 # block, copied VERBATIM (markers included) from the org /.gitignore. The weekly
@@ -19,8 +19,8 @@
 GITIGNORE="${BATS_TEST_DIRNAME}/../.gitignore"
 
 # Canonical marker lines — must match push-protection.sh byte-for-byte.
-BEGIN_MARKER='# >>> BEGIN petry-projects secrets baseline (managed by .github — do not edit) >>>'
-END_MARKER='# <<< END petry-projects secrets baseline <<<'
+BEGIN_MARKER='# >>> BEGIN combsmith secrets baseline (managed by .github — do not edit) >>>'
+END_MARKER='# <<< END combsmith secrets baseline <<<'
 
 # SHA-256 of the org canonical L1 span (BEGIN … END markers inclusive), computed
 # the same way pp_check_gitignore_baseline does: extract the span, then

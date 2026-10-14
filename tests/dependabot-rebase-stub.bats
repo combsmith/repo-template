@@ -2,7 +2,7 @@
 # Drift & compliance regression guard for the dependabot-rebase thin caller stub.
 #
 # .github/workflows/dependabot-rebase.yml is copied VERBATIM from the canonical
-# org template (petry-projects/.github → standards/workflows/dependabot-rebase.yml)
+# org template (combsmith/.github → standards/workflows/dependabot-rebase.yml)
 # and must stay byte-identical across every adopting repo, modulo the per-repo
 # channel pin on the `uses:` ref. Any other diff is drift — the silent-revert
 # class of failure the fleet stub-drift monitor exists to catch (fleet_stub_drift.sh).
@@ -24,7 +24,7 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/dependabot-rebase.yml"
 
 @test "dependabot-rebase stub is byte-identical to the canonical template" {
   # Inline canonical snapshot — update this heredoc whenever the central template
-  # (petry-projects/.github/standards/workflows/dependabot-rebase.yml) changes.
+  # (combsmith/.github/standards/workflows/dependabot-rebase.yml) changes.
   local canon
   canon="$(mktemp)"
   # The committed stub has NO trailing newline — unlike pr-review-mention.yml
@@ -33,9 +33,9 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/dependabot-rebase.yml"
   # that the fleet stub-drift monitor compares SHAs against.
   printf '%s' "$(cat << 'CANONICAL'
 # ─────────────────────────────────────────────────────────────────────────────
-# SOURCE OF TRUTH: petry-projects/.github/standards/workflows/dependabot-rebase.yml
-# Standard:        petry-projects/.github/standards/dependabot-policy.md
-# Reusable:        petry-projects/.github/.github/workflows/dependabot-rebase-reusable.yml
+# SOURCE OF TRUTH: combsmith/.github/standards/workflows/dependabot-rebase.yml
+# Standard:        combsmith/.github/standards/dependabot-policy.md
+# Reusable:        combsmith/.github/.github/workflows/dependabot-rebase-reusable.yml
 #
 # AGENTS — READ BEFORE EDITING:
 #   • This file is a THIN CALLER STUB. All rebase/merge serialization logic
@@ -84,7 +84,7 @@ jobs:
     permissions:
       contents: write   # GITHUB_TOKEN scope for caller; update-branch and merge-PR operations use APP_TOKEN (via APP_ID/APP_PRIVATE_KEY) to bypass recursive guard
       pull-requests: write  # GITHUB_TOKEN scope for caller; update-branch and merge-PR operations use APP_TOKEN (via APP_ID/APP_PRIVATE_KEY) to bypass merge gates
-    uses: petry-projects/.github/.github/workflows/dependabot-rebase-reusable.yml@dependabot-rebase/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
+    uses: combsmith/.github/.github/workflows/dependabot-rebase-reusable.yml@dependabot-rebase/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
     secrets:
       APP_ID: ${{ secrets.APP_ID }}
       APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
@@ -100,7 +100,7 @@ CANONICAL
 }
 
 @test "uses: ref is pinned to the dependabot-rebase/v2-stable channel" {
-  grep -qF 'uses: petry-projects/.github/.github/workflows/dependabot-rebase-reusable.yml@dependabot-rebase/v2-stable' "$STUB"
+  grep -qF 'uses: combsmith/.github/.github/workflows/dependabot-rebase-reusable.yml@dependabot-rebase/v2-stable' "$STUB"
 }
 
 @test "uses: ref is not repointed to @main, a SHA, or a frozen @vN" {

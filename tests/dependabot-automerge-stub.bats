@@ -2,7 +2,7 @@
 # Drift & compliance regression guard for the dependabot-automerge thin caller stub.
 #
 # .github/workflows/dependabot-automerge.yml is copied VERBATIM from the canonical
-# org template (petry-projects/.github → standards/workflows/dependabot-automerge.yml)
+# org template (combsmith/.github → standards/workflows/dependabot-automerge.yml)
 # and must stay byte-identical across every adopting repo, modulo the per-repo
 # channel pin on the `uses:` ref. Any other diff is drift — the silent-revert
 # class of failure the fleet stub-drift monitor exists to catch (fleet_stub_drift.sh).
@@ -26,7 +26,7 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/dependabot-automerge.yml"
 
 @test "dependabot-automerge stub is byte-identical to the canonical template" {
   # Inline canonical snapshot — update this heredoc whenever the central template
-  # (petry-projects/.github/standards/workflows/dependabot-automerge.yml) changes.
+  # (combsmith/.github/standards/workflows/dependabot-automerge.yml) changes.
   local canon
   canon="$(mktemp)"
   # The committed stub has NO trailing newline, so emit the heredoc with its
@@ -34,9 +34,9 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/dependabot-automerge.yml"
   # production stub that the fleet stub-drift monitor compares SHAs against.
   printf '%s' "$(cat << 'CANONICAL'
 # ─────────────────────────────────────────────────────────────────────────────
-# SOURCE OF TRUTH: petry-projects/.github/standards/workflows/dependabot-automerge.yml
-# Standard:        petry-projects/.github/standards/dependabot-policy.md
-# Reusable:        petry-projects/.github/.github/workflows/dependabot-automerge-reusable.yml
+# SOURCE OF TRUTH: combsmith/.github/standards/workflows/dependabot-automerge.yml
+# Standard:        combsmith/.github/standards/dependabot-policy.md
+# Reusable:        combsmith/.github/.github/workflows/dependabot-automerge-reusable.yml
 #
 # AGENTS — READ BEFORE EDITING:
 #   • This file is a THIN CALLER STUB. All eligibility logic and the GitHub
@@ -70,7 +70,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-    uses: petry-projects/.github/.github/workflows/dependabot-automerge-reusable.yml@dependabot-automerge/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
+    uses: combsmith/.github/.github/workflows/dependabot-automerge-reusable.yml@dependabot-automerge/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
     secrets: inherit  # NOSONAR(githubactions:S7635) first-party trusted reusable
 CANONICAL
 )" > "$canon"
@@ -84,7 +84,7 @@ CANONICAL
 }
 
 @test "uses: ref is pinned to the dependabot-automerge/v2-stable channel" {
-  grep -qF 'uses: petry-projects/.github/.github/workflows/dependabot-automerge-reusable.yml@dependabot-automerge/v2-stable' "$STUB"
+  grep -qF 'uses: combsmith/.github/.github/workflows/dependabot-automerge-reusable.yml@dependabot-automerge/v2-stable' "$STUB"
 }
 
 @test "uses: ref is not a bare dependabot-automerge/stable tier pin (issue #105)" {

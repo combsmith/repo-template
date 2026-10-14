@@ -2,8 +2,8 @@
 # Behavior & drift guard for the SonarCloud analysis workflow.
 #
 # .github/workflows/sonarcloud.yml ships verbatim into repos created from
-# petry-projects/repo-template (SOURCE OF TRUTH:
-# petry-projects/.github/standards/workflows/sonarcloud.yml). Its job name is the
+# combsmith/repo-template (SOURCE OF TRUTH:
+# combsmith/.github/standards/workflows/sonarcloud.yml). Its job name is the
 # required `SonarCloud` status check, and the org convention is a first scan that
 # is continue-on-error with a SINGLE retry (the analysis endpoint is occasionally
 # flaky).

@@ -2,7 +2,7 @@
 # Drift & compliance regression guard for the pr-review-mention thin caller stub.
 #
 # .github/workflows/pr-review-mention.yml is copied VERBATIM from the canonical
-# org template (petry-projects/.github → standards/workflows/pr-review-mention.yml)
+# org template (combsmith/.github → standards/workflows/pr-review-mention.yml)
 # and must stay byte-identical across every adopting repo, modulo the per-repo
 # channel pin on the `uses:` ref. Any other diff is drift — the silent-revert
 # class of failure the fleet stub-drift monitor exists to catch (fleet_stub_drift.sh).
@@ -21,20 +21,20 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/pr-review-mention.yml"
 
 @test "pr-review-mention stub is byte-identical to the canonical template" {
   # Inline canonical snapshot — update this heredoc whenever the central template
-  # (petry-projects/.github/standards/workflows/pr-review-mention.yml) changes.
+  # (combsmith/.github/standards/workflows/pr-review-mention.yml) changes.
   # Replaces the external seed-repo-template.sh dependency that was not present in
   # this repo and caused CI to fail with exit 127 on every run.
   local canon
   canon="$(mktemp)"
-  # The live canonical (petry-projects/.github → standards/workflows/pr-review-mention.yml,
+  # The live canonical (combsmith/.github → standards/workflows/pr-review-mention.yml,
   # blob 2d6c410e) ships this stub WITH a single trailing newline. Emit the heredoc
   # with exactly one trailing newline (printf '%s\n') so this guard stays byte-faithful
   # to the upstream blob that the fleet stub-drift monitor compares SHAs against.
   printf '%s\n' "$(cat << 'CANONICAL'
 # ─────────────────────────────────────────────────────────────────────────────
-# SOURCE OF TRUTH: petry-projects/.github/standards/workflows/pr-review-mention.yml
-# Standard:        petry-projects/.github/standards/ci-standards.md
-# Reusable:        petry-projects/.github/.github/workflows/pr-review-mention-reusable.yml
+# SOURCE OF TRUTH: combsmith/.github/standards/workflows/pr-review-mention.yml
+# Standard:        combsmith/.github/standards/ci-standards.md
+# Reusable:        combsmith/.github/.github/workflows/pr-review-mention-reusable.yml
 #
 # AGENTS — READ BEFORE EDITING:
 #   • This file is a THIN CALLER STUB. All review-dispatch logic lives in the
@@ -53,7 +53,7 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/pr-review-mention.yml"
 #
 # PR Review Mention — thin caller for the org-level reusable.
 # To adopt: copy this file to .github/workflows/pr-review-mention.yml in your repo.
-# Requires (org secrets, already present in petry-projects org):
+# Requires (org secrets, already present in combsmith org):
 #   GH_PAT_DON_PETRY     canonical PAT for API calls and dispatching the review agent.
 #                        GH_PAT_WORKFLOWS is the deprecated transition alias, kept as the
 #                        `||` fallback until the persona rename lands fleet-wide.
@@ -74,7 +74,7 @@ jobs:
   pr-review-mention:
     permissions:
       pull-requests: write
-    uses: petry-projects/.github/.github/workflows/pr-review-mention-reusable.yml@pr-review-mention/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
+    uses: combsmith/.github/.github/workflows/pr-review-mention-reusable.yml@pr-review-mention/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
     secrets:
       GH_PAT_WORKFLOWS: ${{ secrets.GH_PAT_DON_PETRY || secrets.GH_PAT_WORKFLOWS }}
       DON_PETRY_BOT_GH_PAT: ${{ secrets.DON_PETRY_BOT_GH_PAT }}
@@ -89,7 +89,7 @@ CANONICAL
 }
 
 @test "uses: ref is pinned to the pr-review-mention/v2-stable channel" {
-  grep -qF 'uses: petry-projects/.github/.github/workflows/pr-review-mention-reusable.yml@pr-review-mention/v2-stable' "$STUB"
+  grep -qF 'uses: combsmith/.github/.github/workflows/pr-review-mention-reusable.yml@pr-review-mention/v2-stable' "$STUB"
 }
 
 @test "uses: ref is not repointed to @main, a SHA, or a frozen @vN" {
