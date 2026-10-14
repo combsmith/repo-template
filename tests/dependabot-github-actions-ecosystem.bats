@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 # Compliance regression guard for the Dependabot GitHub Actions ecosystem
-# (petry-projects/.github → standards/dependabot-policy.md#github-actions-all-repos).
+# (combsmith/.github → standards/dependabot-policy.md#github-actions-all-repos).
 #
 # Every repo MUST include a dedicated `github-actions` ecosystem entry in
 # .github/dependabot.yml. Unlike application ecosystems (npm, etc.) which run

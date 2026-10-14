@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 # Compliance regression guard for the pr-quality ruleset Standard
-# (petry-projects/.github → standards/github-settings.md#pr-quality--standard-ruleset-all-repositories,
+# (combsmith/.github → standards/github-settings.md#pr-quality--standard-ruleset-all-repositories,
 #  codified at standards/rulesets/pr-quality.json).
 #
 # The org "pr-quality" branch ruleset enforces PR-review quality on the default
