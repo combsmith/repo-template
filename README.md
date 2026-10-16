@@ -13,13 +13,17 @@ standards in [`combsmith/.github`](https://github.com/combsmith/.github)
 
 ---
 
-## Commercial Support & Integration
+## 💼 Commercial Support & Enterprise Services
 
-Need enterprise SLAs, custom integrations, or commercial support for tools built on this stack?
+This project is open source and free for the community. For enterprise deployments, proprietary integration, and priority service, commercial support and custom engineering are provided through [CombSmith LLC](https://combsmith.com):
 
-Commercial support and services are offered through **[CombSmith LLC](https://combsmith.com)**:
-- **Enterprise Support SLAs:** Priority bug fixes, dedicated maintenance windows, and security updates.
-- **Custom Integrations:** Bespoke connectors, custom MCP agents, and automated data pipelines.
-- **Consulting & Implementation:** Architectural guidance, local-first data migration, and workflow automation.
+- **Standard SLA & Priority Support:** $199/month per organization
+  - Guaranteed 24-hour issue triage
+  - Dedicated private communications channel
+  - Upstream bug-fix and security patch prioritization
+- **Custom MCP Development & Architecture Advisory:** $250/hour
+  - Custom tool, prompt, and resource connector implementation
+  - Security audit and containerized deployment assistance
+  - Tailored agentic workflow integration
 
-For commercial inquiries, email [support@combsmith.com](mailto:support@combsmith.com) or visit [combsmith.com](https://combsmith.com).
+For commercial invoicing, custom service agreements, or enterprise purchase orders, contact **support@combsmith.com** or visit [combsmith.com](https://combsmith.com).
