@@ -10,7 +10,7 @@ small set of edits that turn the generic scaffold into *this* project, plus the
 removal of the files that only exist to test the template itself.
 
 Run the steps in order. Each step says what to edit, what to leave alone, and
-how to check it. When every step is done, delete this file (step 10).
+how to check it. When every step is done, including the hand-off (step 9) and the done criteria (step 10), delete this file as the very last action.
 
 ---
 
@@ -68,7 +68,7 @@ by PR, and the compliance audit flags any hand edit as drift):
 |---|---|
 | `tests/*.bats` | Regression guards for *this template's* stubs and its shell `ci.yml`. In a product repo they fail the moment `ci.yml` is customized, and the org compliance audit already guards the stubs. Keep individual files only if `STACK` is shell and you want them. If PR automation asks for the `ack-test-deletion` label, add it: these are not product tests. |
 | `standards/rulesets/pr-quality.json` | Codified copy used by the template's tests. The live ruleset is applied to the new repo by `bootstrap-new-repo.sh` (step 9). |
-| `BOOTSTRAP.md` | This runbook, once complete (step 10). |
+| `BOOTSTRAP.md` | This runbook, deleted as the very last action after step 10. |
 
 ---
 
@@ -198,7 +198,7 @@ leave those.)
 ## 8. Remove template-only files; install BMAD if a product repo
 
 ```bash
-git rm -r tests standards BOOTSTRAP.md        # keep tests/ only for a shell stack
+git rm -r tests standards        # keep tests/ only for a shell stack
 ```
 
 If `BMAD=yes`, install the BMAD Method (org standard for product repos:
@@ -237,10 +237,11 @@ repo. The Claude and CodeRabbit GitHub Apps are installed org-wide.
 - [ ] `feature-ideation.yml` carries a real `project_context`.
 - [ ] `sonar-project.properties` names `combsmith_<name>`.
 - [ ] `README.md`, `AGENTS.md`, `copilot-instructions.md` describe this repo; language instruction files copied and listed.
-- [ ] `tests/*.bats`, `standards/`, and `BOOTSTRAP.md` removed (unless shell stack).
+- [ ] `tests/*.bats` and `standards/` removed (unless shell stack).
 - [ ] No stub listed under *Keep verbatim* has a diff.
 - [ ] The bootstrap PR is green on `build-and-test`, `Secret scan (gitleaks)`, `coverage`, `SonarCloud`, `CodeQL`, `agent-shield / AgentShield`, `dependency-audit / Detect ecosystems`.
 - [ ] Hand-off message to the maintainer lists the four org-admin actions in step 9.
+- [ ] Last action: `git rm BOOTSTRAP.md` and commit, once every item above is checked.
 
 ---
 
