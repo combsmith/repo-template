@@ -74,13 +74,15 @@ by PR, and the compliance audit flags any hand edit as drift):
 
 ## 2. Dependabot — pick the stack
 
-Replace `.github/dependabot.yml` with the canonical file for `STACK`
+For `STACK=none`, skip this step: keep the shipped `frontend` file untouched.
+Otherwise replace `.github/dependabot.yml` with the canonical file for `STACK`
 (`frontend` ships by default). Every stack file already contains the required
 `github-actions` entry; do not add a second one.
 
 ```bash
 gh api repos/combsmith/.github/contents/standards/dependabot/${STACK}.yml \
-  --jq '.content' | base64 -d > .github/dependabot.yml
+  --jq '.content' | base64 -d > .github/dependabot.yml.new \
+  && mv .github/dependabot.yml.new .github/dependabot.yml
 ```
 
 Adjust only `directory:` paths if manifests are not at the repo root. Policy:
@@ -91,6 +93,9 @@ Check: `python3 -c 'import yaml,sys; yaml.safe_load(open(".github/dependabot.yml
 ---
 
 ## 3. `ci.yml` — replace the shell checks with your stack's checks
+
+For `STACK=none`, skip this step: there are no stack-specific checks, so keep
+the shipped shell-based `ci.yml` as is.
 
 `.github/workflows/ci.yml` ships with three jobs. Keep all three job ids and
 display names; two of them are org required checks and the third is this repo's
@@ -132,7 +137,7 @@ Replace the `TODO:`/`Example:` placeholder under `project_context:` with
 `PROJECT_CONTEXT`. This is the only edit allowed in that file; the compliance
 audit raises `feature-ideation-placeholder-context` until it is done.
 
-Check: `grep -c 'TODO: Replace this' .github/workflows/feature-ideation.yml` prints `0`.
+Check: `! grep -q 'TODO: Replace this' .github/workflows/feature-ideation.yml` exits 0.
 
 ---
 
@@ -170,7 +175,8 @@ org-wide; no console step is needed for a public repo.
    Standards). Keep it to about two pages.
 4. **`.github/instructions/`** — for each language in `STACK`, copy the
    canonical path-scoped file and list it under `## Org Standards` in
-   `copilot-instructions.md`:
+   `copilot-instructions.md`. The canonical repo has no Rust file, so
+   `STACK=backend-rust` gets no language-specific instruction file:
 
    ```bash
    mkdir -p .github/instructions
@@ -189,8 +195,8 @@ org-wide; no console step is needed for a public repo.
 7. **`.gitleaks.toml`** — append allowlist paths only for real false positives
    (test fixtures, generated keys). Keep the `_bmad/` entry.
 
-Check: `grep -n "repo-template" README.md AGENTS.md .github/copilot-instructions.md sonar-project.properties`
-prints nothing. (Workflow stub headers legitimately mention `repo-template`;
+Check: `! grep -q "repo-template" README.md AGENTS.md .github/copilot-instructions.md sonar-project.properties`
+exits 0. (Workflow stub headers legitimately mention `repo-template`;
 leave those.)
 
 ---
