@@ -271,9 +271,11 @@ org-wide; no console step is needed for a public repo.
 4. **`.github/instructions/`** — for each language in `STACK`, copy the
    canonical path-scoped file and list it under `## Org Standards` in
    `copilot-instructions.md`. The language list follows from `STACK`; add
-   `shell` whenever the repo has shell scripts of its own, whatever the stack.
-   The canonical repo has no Rust file, so `STACK=backend-rust` gets no
-   language-specific instruction file:
+   `shell` whenever the repo has shell scripts of its own, whatever the stack,
+   and `python` for a `fullstack` repo that has Python code (the same repos
+   that add the `pip` Dependabot block in step 2). The canonical repo has no
+   Rust file, so `STACK=backend-rust` gets no language-specific instruction
+   file:
 
    | `STACK` | Languages |
    |---|---|
@@ -282,7 +284,7 @@ org-wide; no console step is needed for a public repo.
    | `backend-python` | `python` |
    | `backend-rust` | none |
    | `infra-terraform` | `terraform` |
-   | `fullstack` | `typescript javascript go terraform` |
+   | `fullstack` | `typescript javascript go terraform`, plus `python` when the repo has Python code |
    | `none` | none |
 
    ```bash
@@ -297,8 +299,12 @@ org-wide; no console step is needed for a public repo.
      backend-rust|none) langs="" ;;
      *) echo "unknown STACK: $STACK" >&2; exit 1 ;;
    esac
-   if find . -path ./.git -prune -o -name '*.sh' -print | grep -q .; then
+   if find . -path ./.git -prune -o -name '*.sh' -print -quit | grep -q .; then
      langs="$langs shell"
+   fi
+   if [ "$STACK" = fullstack ] \
+     && find . -path ./.git -prune -o -name '*.py' -print -quit | grep -q .; then
+     langs="$langs python"
    fi
    for lang in $langs; do
      gh api repos/combsmith/.github/contents/.github/instructions/${lang}.instructions.md \
