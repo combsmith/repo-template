@@ -182,7 +182,8 @@ Stack notes from the validation run:
   result is exit status 5:
 
   ```bash
-  python -m pytest --collect-only -q >/dev/null 2>&1; rc=$?
+  rc=0
+  python -m pytest --collect-only -q >/dev/null 2>&1 || rc=$?   # `|| rc=$?` keeps bash -e from aborting on exit 5
   if [ "$rc" -eq 5 ]; then echo "No tests found — coverage is green until tests exist."; exit 0; fi
   [ "$rc" -eq 0 ] || exit "$rc"
   python -m pytest -q --cov=src --cov-report=term --cov-report=xml
