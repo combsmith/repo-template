@@ -235,7 +235,9 @@ Check: `! grep -q 'TODO: Replace this' .github/workflows/feature-ideation.yml` e
 file needs no project key and **no edit** for most repos. SonarCloud
 auto-provisions the project on the first scan; it is enabled org-wide and no
 console step is needed for a public repo. Do not add `sonar.projectKey` or
-`sonar.organization` to the file: a value there would shadow the derived one.
+`sonar.organization` to the file: the workflow's `-D` arguments take precedence
+over the properties file, so a value there cannot override the derived identity
+and would only mislead the next reader.
 
 Edit the file only if the defaults (`sonar.sources=.` plus the
 `node_modules`/`vendor`/`dist` exclusions) are wrong for this repo:

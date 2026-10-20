@@ -130,7 +130,9 @@ PYEOF
 @test "sonar-project.properties carries no hard-coded projectKey / organization" {
   props="${BATS_TEST_DIRNAME}/../sonar-project.properties"
   [ -f "$props" ]
-  if grep -nE '^(sonar\.projectKey|sonar\.organization)=' "$props"; then
+  # Java properties accept `key=value`, `key:value` and `key value` with optional
+  # leading whitespace; reject every form.
+  if grep -nE '^[[:space:]]*sonar\.(projectKey|organization)([[:space:]]|=|:)' "$props"; then
     echo "sonar-project.properties must not pin projectKey/organization — the workflow derives them" >&2
     return 1
   fi
