@@ -9,6 +9,8 @@
 #      needs no per-repo edit — add the SONAR_TOKEN repo secret and it scans into
 #      its own SonarCloud project (auto-provisioned on the first scan).
 #      sonar-project.properties carries only stack-agnostic sources/exclusions.
+#      If the repo is renamed, update the key on the existing SonarCloud project
+#      (Administration → Update Key) so its history follows the new name.
 #   3. The job name `SonarCloud` is the required status check — keep it.
 #   4. The scan is guarded on SONAR_TOKEN, so the job is a green no-op until the
 #      secret is set — a fresh repo is not blocked on day 0.

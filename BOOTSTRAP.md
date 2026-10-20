@@ -245,6 +245,13 @@ Edit the file only if the defaults (`sonar.sources=.` plus the
 - `sonar.sources` — the source directories, e.g. `src`, if scanning `.` pulls
   in generated or vendored code the exclusions do not cover.
 - `sonar.tests` — the test directory; omit the line if there are no tests yet.
+  If you add it, also narrow `sonar.sources` so the two do not overlap: with
+  `sonar.sources=.` and `sonar.tests=tests` every file under `tests/` is in
+  both scopes and the analysis fails with `can't be indexed twice`.
+
+If the repo is ever renamed, the derived key changes with it. Keep the history
+by updating the key on the existing SonarCloud project (Administration → Update
+Key) to the new `<owner>_<name>` rather than adding an override here.
 
 Java properties files only treat `#` as a comment at the start of a line: a
 trailing `# note` after a value becomes part of the value, so do not annotate
