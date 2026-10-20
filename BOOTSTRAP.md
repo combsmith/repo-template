@@ -228,24 +228,30 @@ Check: `! grep -q 'TODO: Replace this' .github/workflows/feature-ideation.yml` e
 
 ---
 
-## 6. `sonar-project.properties` — set the project key and organization
+## 6. `sonar-project.properties` — nothing to set unless you narrow the sources
 
-`sonarcloud.yml` passes no `args`, so the scanner reads `sonar.projectKey` and
-`sonar.organization` only from this file. Set them for the new repo:
+`sonarcloud.yml` derives `sonar.projectKey` (`<owner>_<name>`) and
+`sonar.organization` (`<owner>`) from the repo at run time, so the shipped
+file needs no project key and **no edit** for most repos. SonarCloud
+auto-provisions the project on the first scan; it is enabled org-wide and no
+console step is needed for a public repo. Do not add `sonar.projectKey` or
+`sonar.organization` to the file: the workflow's `-D` arguments take precedence
+over the properties file, so a value there cannot override the derived identity
+and would only mislead the next reader.
 
-- `sonar.projectKey` — `<owner>_<name>`, e.g. `acme_my-service`.
-- `sonar.organization` — `<owner>`, e.g. `acme`.
-
-Without both, the required `SonarCloud` check fails whenever `SONAR_TOKEN` is
-present. SonarCloud auto-provisions the project on the first scan; it is
-enabled org-wide and no console step is needed for a public repo.
-
-Also edit the file if the defaults (`sonar.sources=.` plus the
+Edit the file only if the defaults (`sonar.sources=.` plus the
 `node_modules`/`vendor`/`dist` exclusions) are wrong for this repo:
 
 - `sonar.sources` — the source directories, e.g. `src`, if scanning `.` pulls
   in generated or vendored code the exclusions do not cover.
 - `sonar.tests` — the test directory; omit the line if there are no tests yet.
+  If you add it, also narrow `sonar.sources` so the two do not overlap: with
+  `sonar.sources=.` and `sonar.tests=tests` every file under `tests/` is in
+  both scopes and the analysis fails with `can't be indexed twice`.
+
+If the repo is ever renamed, the derived key changes with it. Keep the history
+by updating the key on the existing SonarCloud project (Administration → Update
+Key) to the new `<owner>_<name>` rather than adding an override here.
 
 Java properties files only treat `#` as a comment at the start of a line: a
 trailing `# note` after a value becomes part of the value, so do not annotate
@@ -301,13 +307,11 @@ the lines themselves.
      backend-rust|none) langs="" ;;
      *) echo "unknown STACK: $STACK" >&2; exit 1 ;;
    esac
-   # git ls-files (tracked + non-ignored) so node_modules, virtualenvs and other
-   # ignored dirs are never counted; head -n 1 in $(...) avoids a pipefail SIGPIPE.
-   if [ -n "$(git ls-files -co --exclude-standard -- '*.sh' | head -n 1)" ]; then
+   if find . -path ./.git -prune -o -name '*.sh' -print -quit | grep -q .; then
      langs="$langs shell"
    fi
    if [ "$STACK" = fullstack ] \
-     && [ -n "$(git ls-files -co --exclude-standard -- '*.py' | head -n 1)" ]; then
+     && find . -path ./.git -prune -o -name '*.py' -print -quit | grep -q .; then
      langs="$langs python"
    fi
    for lang in $langs; do
