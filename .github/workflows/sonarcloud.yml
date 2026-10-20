@@ -4,8 +4,13 @@
 #
 # ADOPTING THIS WORKFLOW:
 #   1. This ships verbatim into repos created from combsmith/repo-template.
-#   2. Set sonar.projectKey / sonar.organization in sonar-project.properties to
-#      match your repo (see BOOTSTRAP.md), and add the SONAR_TOKEN repo secret.
+#   2. The project key and organization are derived from the repo at run time
+#      (<owner>_<name> / <owner>) via `args:` on both scan steps, so a new repo
+#      needs no per-repo edit — add the SONAR_TOKEN repo secret and it scans into
+#      its own SonarCloud project (auto-provisioned on the first scan).
+#      sonar-project.properties carries only stack-agnostic sources/exclusions.
+#      If the repo is renamed, update the key on the existing SonarCloud project
+#      (Administration → Update Key) so its history follows the new name.
 #   3. The job name `SonarCloud` is the required status check — keep it.
 #   4. The scan is guarded on SONAR_TOKEN, so the job is a green no-op until the
 #      secret is set — a fresh repo is not blocked on day 0.
@@ -16,6 +21,9 @@
 #   • first scan is continue-on-error with a single retry (SonarCloud's analysis
 #     endpoint is occasionally flaky)
 #   • SHA-pin every third-party action (never a tag/branch)
+#   • both scan steps pass the derived -Dsonar.projectKey / -Dsonar.organization
+#     (a hard-coded key would make every repo cut from the template scan into
+#     the template's project and fail PR analysis with an unknown PR key)
 # ─────────────────────────────────────────────────────────────────────────────
 name: SonarCloud Analysis
 
@@ -52,6 +60,10 @@ jobs:
         id: sonar
         if: env.SONAR_TOKEN != ''
         uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
+        with:
+          args: >-
+            -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
+            -Dsonar.organization=${{ github.repository_owner }}
         continue-on-error: true
       - name: Wait before SonarCloud retry
         if: env.SONAR_TOKEN != '' && steps.sonar.outcome == 'failure'
@@ -59,3 +71,7 @@ jobs:
       - name: SonarCloud Scan (retry)
         if: env.SONAR_TOKEN != '' && steps.sonar.outcome == 'failure'
         uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
+        with:
+          args: >-
+            -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
+            -Dsonar.organization=${{ github.repository_owner }}
