@@ -37,6 +37,12 @@ Rules for an agent:
 - `none` is valid for `STACK` (docs-only or not-yet-decided repos): keep the
   shipped shell-based `ci.yml` and the `frontend` Dependabot file, and revisit
   when code lands.
+- **Ask the maintainer to run step 9 item 1 (`bootstrap-new-repo.sh`) before
+  you open the PR.** A repo fresh from the template has no rulesets, so nothing
+  gates a merge: on the validation run the bootstrap PR was merged two minutes
+  after it was opened, with no approving review, and a Dependabot major bump
+  merged the same way. If the rulesets are not in place yet, open the PR as a
+  **draft** and say so in the hand-off.
 - Work on a branch and open one PR titled `chore: bootstrap from repo-template`.
   Never push to `main`. The PR body must carry the org's required sections,
   each at least one line: `## Problem`, `## Risk`, `## Test plan`,
