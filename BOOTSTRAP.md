@@ -344,12 +344,14 @@ esac
 
 ## 8. Remove template-only files; install BMAD if a product repo
 
-The template guards (`*-stub.bats`, `gitignore-baseline.bats`,
-`pr-quality-ruleset.bats`) test the template, not the project, and go in every
-repo:
+Every template Bats file other than `tests/ci-*.bats` (the `*-stub.bats`
+guards, `gitignore-baseline.bats`, `pr-quality-ruleset.bats`,
+`dependabot-github-actions-ecosystem.bats`, `pr-auto-review-concurrency.bats`)
+tests the template, not the project, and goes in every repo. Derive the set
+from the directory rather than naming files, so nothing is left behind:
 
 ```bash
-git rm tests/*-stub.bats tests/gitignore-baseline.bats tests/pr-quality-ruleset.bats
+find tests -maxdepth 1 -name '*.bats' ! -name 'ci-*.bats' -exec git rm {} +
 git rm -r standards
 ```
 
