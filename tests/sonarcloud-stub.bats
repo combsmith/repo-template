@@ -102,6 +102,43 @@ if not (first_i < backoff_i < retry_i):
 PYEOF
 }
 
+@test "both scan steps derive sonar.projectKey / sonar.organization from the repo" {
+  # A hard-coded key in sonar-project.properties made every repo cut from the
+  # template scan into the template's own SonarCloud project (and fail PR
+  # analysis with "Could not find the pullrequest with key"). Both the first
+  # scan and the retry must pass the derived identity via `args:`.
+  python3 - "$STUB" <<'PYEOF'
+import yaml, sys
+with open(sys.argv[1], encoding='utf-8') as f:
+    wf = yaml.safe_load(f)
+steps = wf.get('jobs', {}).get('sonarcloud', {}).get('steps', [])
+scans = [s for s in steps if 'sonarqube-scan-action' in str(s.get('uses', ''))]
+if len(scans) != 2:
+    print(f"expected exactly 2 sonarqube-scan-action steps, got {len(scans)}")
+    sys.exit(1)
+key = '-Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}'
+org = '-Dsonar.organization=${{ github.repository_owner }}'
+for s in scans:
+    args = str((s.get('with') or {}).get('args', ''))
+    for want in (key, org):
+        if want not in args:
+            print(f"scan step {s.get('name')!r} must pass {want} in with.args, got {args!r}")
+            sys.exit(1)
+PYEOF
+}
+
+@test "sonar-project.properties carries no hard-coded projectKey / organization" {
+  props="${BATS_TEST_DIRNAME}/../sonar-project.properties"
+  [ -f "$props" ]
+  # Java properties accept `key=value`, `key:value` and `key value` with optional
+  # leading whitespace; reject every form.
+  if grep -nE '^[[:space:]]*sonar\.(projectKey|organization)([[:space:]]|=|:)' "$props"; then
+    echo "sonar-project.properties must not pin projectKey/organization — the workflow derives them" >&2
+    return 1
+  fi
+  grep -qE '^sonar\.sources=' "$props"
+}
+
 @test "top-level permissions are locked down to {}" {
   grep -q '^permissions: {}' "$STUB" || { echo "Top-level permissions are not locked down to {}"; return 1; }
 }
