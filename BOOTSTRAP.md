@@ -298,11 +298,13 @@ the lines themselves.
      backend-rust|none) langs="" ;;
      *) echo "unknown STACK: $STACK" >&2; exit 1 ;;
    esac
-   if find . -path ./.git -prune -o -name '*.sh' -print -quit | grep -q .; then
+   # git ls-files (tracked + non-ignored) so node_modules, virtualenvs and other
+   # ignored dirs are never counted; head -n 1 in $(...) avoids a pipefail SIGPIPE.
+   if [ -n "$(git ls-files -co --exclude-standard -- '*.sh' | head -n 1)" ]; then
      langs="$langs shell"
    fi
    if [ "$STACK" = fullstack ] \
-     && find . -path ./.git -prune -o -name '*.py' -print -quit | grep -q .; then
+     && [ -n "$(git ls-files -co --exclude-standard -- '*.py' | head -n 1)" ]; then
      langs="$langs python"
    fi
    for lang in $langs; do
