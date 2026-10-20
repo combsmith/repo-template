@@ -33,7 +33,7 @@ tests/*.bats              # Template-only guards: stub byte-identity, ci.yml inv
                           # gitignore baseline, ruleset drift. Removed in child repos.
 AGENTS.md                 # Org pointer + rules specific to this template
 BOOTSTRAP.md              # Customization runbook for repos created from this template
-sonar-project.properties  # SonarCloud project key (customize per repo)
+sonar-project.properties  # SonarCloud sources/exclusions (key is derived by sonarcloud.yml)
 ```
 
 ## Local Dev Commands
