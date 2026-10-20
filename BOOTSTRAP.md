@@ -12,6 +12,12 @@ removal of the files that only exist to test the template itself.
 Run the steps in order. Each step says what to edit, what to leave alone, and
 how to check it. When every step is done, including the hand-off (step 9) and the done criteria (step 10), delete this file as the very last action.
 
+_Last validated end to end on 2026-10-20 with `STACK=backend-python` on a
+throwaway repo: the untouched template was green on every check at creation,
+and the bootstrap PR was green on every required check. The stack-specific
+notes below (pip-audit file, ruff and Markdown, org-secret grant) come from
+that run._
+
 ---
 
 ## 0. Inputs — collect these before editing anything
@@ -32,7 +38,19 @@ Rules for an agent:
   shipped shell-based `ci.yml` and the `frontend` Dependabot file, and revisit
   when code lands.
 - Work on a branch and open one PR titled `chore: bootstrap from repo-template`.
-  Never push to `main`.
+  Never push to `main`. The PR body must carry the org's required sections,
+  each at least one line: `## Problem`, `## Risk`, `## Test plan`,
+  `## Rollback`, `## Monitoring` (PR triage escalates a PR missing three or
+  more of them).
+- Commit with a GitHub no-reply address (`<id>+<login>@users.noreply.github.com`,
+  as in `git config user.email` of an existing checkout). GitHub rejects a push
+  whose commits carry a private personal email (`GH007`).
+- Run every `gh api … | base64 -d > file` download with `set -o pipefail` (or
+  check the file is non-empty before using it). Without it, an auth or 404
+  failure in `gh` is masked by `base64`'s zero exit and leaves an empty file.
+- If the stack's toolchain is not available locally (wrong Python, no Node),
+  do not fake a local run: push the branch and let the PR's CI verify. Report
+  which checks you could and could not run.
 
 ---
 
@@ -80,15 +98,36 @@ Otherwise replace `.github/dependabot.yml` with the canonical file for `STACK`
 `github-actions` entry; do not add a second one.
 
 ```bash
+set -o pipefail
 gh api repos/combsmith/.github/contents/standards/dependabot/${STACK}.yml \
   --jq '.content' | base64 -d > .github/dependabot.yml.new \
+  && [ -s .github/dependabot.yml.new ] \
   && mv .github/dependabot.yml.new .github/dependabot.yml
 ```
 
 Adjust only `directory:` paths if manifests are not at the repo root. Policy:
 [`standards/dependabot-policy.md`](https://github.com/combsmith/.github/blob/main/standards/dependabot-policy.md).
 
-Check: `python3 -c 'import yaml,sys; yaml.safe_load(open(".github/dependabot.yml"))'` exits 0.
+**Python stacks (`backend-python`, or `fullstack` with Python) also need
+`scripts/pip-audit-requirements.txt`.** The org `dependency-audit` reusable's
+`pip-audit` job installs pip-audit from that hash-pinned file in the consumer
+repo and fails with "No such file" when it is absent (observed on the
+validation run). Copy it verbatim:
+
+```bash
+mkdir -p scripts
+gh api repos/combsmith/.github/contents/scripts/pip-audit-requirements.txt \
+  --jq '.content' | base64 -d > scripts/pip-audit-requirements.txt \
+  && [ -s scripts/pip-audit-requirements.txt ]
+```
+
+The other ecosystems (npm, pnpm, Go, Cargo) need no extra file; their audit
+jobs key off the lockfile.
+
+Check: the file parses as YAML with `version: 2`. Use whichever parser is
+installed: `yq '.version' .github/dependabot.yml` or
+`python3 -c 'import yaml; print(yaml.safe_load(open(".github/dependabot.yml"))["version"])'`
+(PyYAML is not in the standard library; `python3 -m pip install pyyaml` if needed).
 
 ---
 
@@ -114,11 +153,33 @@ third-party action (`uses: owner/action@<40-char sha> # vX.Y.Z`). Keep the
 retry-with-increasing-backoff pattern for any network install step; the Fleet
 Monitor flags flaky installs.
 
-Stack patterns and SHA-pinned setup actions:
+Stack patterns:
 [`ci-standards.md` → Workflow Patterns by Tech Stack](https://github.com/combsmith/.github/blob/main/standards/ci-standards.md#workflow-patterns-by-tech-stack).
+Those patterns show `@vN` tags; the SHA-pinned equivalents for `setup-node`,
+`pnpm/action-setup`, `setup-go` and `setup-python` are already in the comment
+blocks of `copilot-setup-steps.yml`. To pin any other action, resolve the tag
+yourself and record the tag in the trailing comment:
 
-Check: `python3 -c 'import yaml; yaml.safe_load(open(".github/workflows/ci.yml"))'`
-exits 0, and the three job ids above are still present.
+```bash
+gh api repos/<owner>/<action>/git/ref/tags/<tag> --jq '.object | "\(.type) \(.sha)"'
+# type "commit" → use the sha. type "tag" (annotated) → dereference once more:
+gh api repos/<owner>/<action>/git/tags/<sha> --jq '.object.sha'
+```
+
+Stack notes from the validation run:
+
+- **Coverage guard.** When the stack has no tests yet, let the test runner
+  decide (`python -m pytest --collect-only -q`, `npm test -- --listTests`, …)
+  rather than globbing filenames, so both `test_*.py` and `*_test.py` styles
+  count.
+- **Python.** `ruff format --check .` also formats Python code blocks inside
+  Markdown, including the copied `.github/instructions/python.instructions.md`.
+  Either run `ruff format` once over the repo before committing, or add
+  `extend-exclude = [".github/instructions"]` under `[tool.ruff]`.
+
+Check: the file still parses as YAML (same parser options as step 2) and the
+three job ids above are still present:
+`grep -cE '^  (build-and-test|secret-scan|coverage):$' .github/workflows/ci.yml` prints `3`.
 
 ---
 
@@ -179,10 +240,12 @@ org-wide; no console step is needed for a public repo.
    `STACK=backend-rust` gets no language-specific instruction file:
 
    ```bash
+   set -o pipefail
    mkdir -p .github/instructions
    for lang in python shell; do   # pick from: typescript javascript python go terraform shell
      gh api repos/combsmith/.github/contents/.github/instructions/${lang}.instructions.md \
-       --jq '.content' | base64 -d > .github/instructions/${lang}.instructions.md
+       --jq '.content' | base64 -d > .github/instructions/${lang}.instructions.md \
+       && [ -s .github/instructions/${lang}.instructions.md ]
    done
    ```
 
@@ -195,17 +258,26 @@ org-wide; no console step is needed for a public repo.
 7. **`.gitleaks.toml`** — append allowlist paths only for real false positives
    (test fixtures, generated keys). Keep the `_bmad/` entry.
 
-Check: `! grep -q "repo-template" README.md AGENTS.md .github/copilot-instructions.md sonar-project.properties`
-exits 0. (Workflow stub headers legitimately mention `repo-template`;
-leave those.)
+Check: no template placeholder text survives. The patterns below are the
+template's own wording, so a project that legitimately mentions
+`repo-template` (for example in a provenance line) still passes:
+
+```bash
+! grep -qE 'Org baseline scaffold|combsmith_repo-template|Copilot Instructions — repo-template|What this repository is' \
+    README.md AGENTS.md .github/copilot-instructions.md sonar-project.properties
+```
 
 ---
 
 ## 8. Remove template-only files; install BMAD if a product repo
 
 ```bash
-git rm -r tests standards        # keep tests/ only for a shell stack
+git rm tests/*.bats              # keep individual files only for a shell stack
+git rm -r standards
 ```
+
+Remove only the Bats files, not the `tests/` directory: your own test suite
+(`tests/test_*.py`, `tests/*.test.ts`, …) may already live there or will.
 
 If `BMAD=yes`, install the BMAD Method (org standard for product repos:
 spec-driven development, planning artifacts in `_bmad-output/`):
@@ -227,11 +299,15 @@ Report these to the maintainer as the hand-off. None of them require code change
 | 1 | Apply repo settings, GHAS + push protection, the `pr-quality` and `code-quality` rulesets, the standard label set, CODEOWNERS verification, and confirm the release ring. | In a checkout of `combsmith/.github`: `DRY_RUN=true bash scripts/bootstrap-new-repo.sh REPO`, review, then `bash scripts/bootstrap-new-repo.sh REPO`. Needs a classic PAT with `repo` + `admin:org`. |
 | 2 | Set the repo description and topics; enable Discussions and create the **Ideas** (💡) and **General** (💬) categories. | `gh repo edit REPO --description "DESCRIPTION"`; categories via Settings → Discussions (no REST API). |
 | 3 | Add the new repo to the advisory review bots' per-repo lists. | Gemini Code Assist: Google Cloud → Developer Connect (`code-assist-<org>`, `us-east1`) → Link Repositories. Codex: ChatGPT Codex connector settings. Verify with a throwaway PR and `/gemini review`. CodeRabbit and SonarCloud need no per-repo step. |
-| 4 | Confirm CodeQL default setup is `configured` (done by step 1; verify). | `gh api repos/REPO/code-scanning/default-setup --jq .state` |
+| 4 | Confirm CodeQL default setup is `configured` (the org security configuration applies it at creation; step 1 re-asserts it). | `gh api repos/REPO/code-scanning/default-setup --jq .state` |
+| 5 | Grant the new repo access to the **selected-visibility** org secrets `INITIATIVES_APP_ID` and `INITIATIVES_APP_PRIVATE_KEY` (the `combsmith-planner` app), and make sure that app's installation includes the repo. Until then every `add-to-project` run fails with `The 'client-id' … must be set to a non-empty string` (observed on the validation run). | Org settings → Secrets and variables → Actions → each secret → Repository access; or `gh api -X PUT orgs/combsmith/actions/secrets/INITIATIVES_APP_ID/repositories/<repo_id>` (same for the private key). |
 
-Org secrets (`SONAR_TOKEN`, `APP_ID`/`APP_PRIVATE_KEY`, `GH_PAT_WORKFLOWS`,
-`CLAUDE_CODE_OAUTH_TOKEN`, `INITIATIVES_APP_*`) are inherited; nothing to set per
-repo. The Claude and CodeRabbit GitHub Apps are installed org-wide.
+All other org secrets the stubs use (`SONAR_TOKEN`, `APP_ID`/`APP_PRIVATE_KEY`,
+`GH_PAT_WORKFLOWS`, `CLAUDE_CODE_OAUTH_TOKEN`) have **all-repositories**
+visibility and need nothing per repo. The Claude and CodeRabbit GitHub Apps are
+installed org-wide. `DRY_RUN=true` for item 1 was verified to print the full plan
+and `PASS` with a plain `gh auth token`; the real run needs the classic PAT
+because the CodeQL and check-suite-preference reads return 404 otherwise.
 
 ---
 
@@ -245,8 +321,8 @@ repo. The Claude and CodeRabbit GitHub Apps are installed org-wide.
 - [ ] `README.md`, `AGENTS.md`, `copilot-instructions.md` describe this repo; language instruction files copied and listed.
 - [ ] `tests/*.bats` and `standards/` removed (unless shell stack).
 - [ ] No stub listed under *Keep verbatim* has a diff.
-- [ ] The bootstrap PR is green on `build-and-test`, `Secret scan (gitleaks)`, `coverage`, `SonarCloud`, `CodeQL`, `agent-shield / AgentShield`, `dependency-audit / Detect ecosystems`.
-- [ ] Hand-off message to the maintainer lists the four org-admin actions in step 9.
+- [ ] The bootstrap PR is green on `build-and-test`, `Secret scan (gitleaks)`, `coverage`, `SonarCloud`, `CodeQL`, `agent-shield / AgentShield`, `dependency-audit / Detect ecosystems`, and on the stack's own audit job (`dependency-audit / pip-audit`, `npm audit`, `govulncheck` or `cargo audit`). `dev-lead / *` jobs showing *cancelled* is normal: a burst of review events collapses them onto the newest run.
+- [ ] Hand-off message to the maintainer lists the five org-admin actions in step 9, and says `add-to-project` will stay red until item 5 is done.
 - [ ] Last action: `git rm BOOTSTRAP.md` and commit, once every item above is checked.
 
 ---
