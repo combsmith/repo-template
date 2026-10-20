@@ -228,16 +228,19 @@ Check: `! grep -q 'TODO: Replace this' .github/workflows/feature-ideation.yml` e
 
 ---
 
-## 6. `sonar-project.properties` — nothing to set unless you narrow the sources
+## 6. `sonar-project.properties` — set the project key and organization
 
-`sonarcloud.yml` derives `sonar.projectKey` (`<owner>_<name>`) and
-`sonar.organization` (`<owner>`) from the repo at run time, so the shipped
-file needs no project key and **no edit** for most repos. SonarCloud
-auto-provisions the project on the first scan; it is enabled org-wide and no
-console step is needed for a public repo. Do not add `sonar.projectKey` or
-`sonar.organization` to the file: a value there would shadow the derived one.
+`sonarcloud.yml` passes no `args`, so the scanner reads `sonar.projectKey` and
+`sonar.organization` only from this file. Set them for the new repo:
 
-Edit the file only if the defaults (`sonar.sources=.` plus the
+- `sonar.projectKey` — `<owner>_<name>`, e.g. `acme_my-service`.
+- `sonar.organization` — `<owner>`, e.g. `acme`.
+
+Without both, the required `SonarCloud` check fails whenever `SONAR_TOKEN` is
+present. SonarCloud auto-provisions the project on the first scan; it is
+enabled org-wide and no console step is needed for a public repo.
+
+Also edit the file if the defaults (`sonar.sources=.` plus the
 `node_modules`/`vendor`/`dist` exclusions) are wrong for this repo:
 
 - `sonar.sources` — the source directories, e.g. `src`, if scanning `.` pulls
