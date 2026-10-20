@@ -90,7 +90,7 @@ by PR, and the compliance audit flags any hand edit as drift):
 
 | Path | Why |
 |---|---|
-| `tests/*.bats` | Regression guards for *this template's* stubs and its shell `ci.yml`. In a product repo they fail the moment `ci.yml` is customized, and the org compliance audit already guards the stubs. Keep individual files only if `STACK` is shell and you want them. If PR automation asks for the `ack-test-deletion` label, add it: these are not product tests. |
+| `tests/*.bats` | Regression guards for *this template's* stubs and its shell `ci.yml`. In a product repo they fail the moment `ci.yml` is customized, and the org compliance audit already guards the stubs. Delete them (step 8 names the one narrow exception for shell-script repos). If PR automation asks for the `ack-test-deletion` label, add it: these are not product tests. |
 | `standards/rulesets/pr-quality.json` | Codified copy used by the template's tests. The live ruleset is applied to the new repo by `bootstrap-new-repo.sh` (step 9). |
 | `BOOTSTRAP.md` | This runbook, deleted as the very last action after step 10. |
 
@@ -177,15 +177,28 @@ Stack notes from the validation run:
 - **Coverage guard.** When the stack has no tests yet, let the test runner
   decide (`python -m pytest --collect-only -q`, `npm test -- --listTests`, …)
   rather than globbing filenames, so both `test_*.py` and `*_test.py` styles
-  count.
+  count. Treat only the runner's documented "no tests collected" result as the
+  green-until-tests case and propagate every other exit code. For pytest that
+  result is exit status 5:
+
+  ```bash
+  python -m pytest --collect-only -q >/dev/null 2>&1; rc=$?
+  if [ "$rc" -eq 5 ]; then echo "No tests found — coverage is green until tests exist."; exit 0; fi
+  [ "$rc" -eq 0 ] || exit "$rc"
+  python -m pytest -q --cov=src --cov-report=term --cov-report=xml
+  ```
 - **Python.** `ruff format --check .` also formats Python code blocks inside
   Markdown, including the copied `.github/instructions/python.instructions.md`.
   Either run `ruff format` once over the repo before committing, or add
   `extend-exclude = [".github/instructions"]` under `[tool.ruff]`.
 
-Check: the file still parses as YAML (same parser options as step 2) and the
-three job ids above are still present:
-`grep -cE '^  (build-and-test|secret-scan|coverage):$' .github/workflows/ci.yml` prints `3`.
+Check: the file still parses as YAML (same parser options as step 2), and both
+the job ids and the display names are intact (each command prints `3`):
+
+```bash
+grep -cE '^  (build-and-test|secret-scan|coverage):$' .github/workflows/ci.yml
+grep -cE '^    name: (build-and-test|Secret scan \(gitleaks\)|coverage)$' .github/workflows/ci.yml
+```
 
 ---
 
@@ -278,12 +291,16 @@ template's own wording, so a project that legitimately mentions
 ## 8. Remove template-only files; install BMAD if a product repo
 
 ```bash
-git rm tests/*.bats              # keep individual files only for a shell stack
+git rm tests/*.bats
 git rm -r standards
 ```
 
 Remove only the Bats files, not the `tests/` directory: your own test suite
-(`tests/test_*.py`, `tests/*.test.ts`, …) may already live there or will.
+(`tests/test_*.py`, `tests/*.test.ts`, …) may already live there or will. The
+one exception: a `STACK=none` repo whose code is itself shell scripts tested
+with Bats may keep individual `tests/ci-*.bats` files as a starting point, but
+must still delete the `*-stub.bats`, `gitignore-baseline.bats` and
+`pr-quality-ruleset.bats` guards, which test the template, not the project.
 
 If `BMAD=yes`, install the BMAD Method (org standard for product repos:
 spec-driven development, planning artifacts in `_bmad-output/`):
@@ -325,7 +342,7 @@ because the CodeQL and check-suite-preference reads return 404 otherwise.
 - [ ] `feature-ideation.yml` carries a real `project_context`.
 - [ ] `sonar-project.properties` names `combsmith_<name>`.
 - [ ] `README.md`, `AGENTS.md`, `copilot-instructions.md` describe this repo; language instruction files copied and listed.
-- [ ] `tests/*.bats` and `standards/` removed (unless shell stack).
+- [ ] `tests/*.bats` and `standards/` removed (step 8 exception aside).
 - [ ] No stub listed under *Keep verbatim* has a diff.
 - [ ] The bootstrap PR is green on `build-and-test`, `Secret scan (gitleaks)`, `coverage`, `SonarCloud`, `CodeQL`, `agent-shield / AgentShield`, `dependency-audit / Detect ecosystems`, and on the stack's own audit job (`dependency-audit / pip-audit`, `npm audit`, `govulncheck` or `cargo audit`). `dev-lead / *` jobs showing *cancelled* is normal: a burst of review events collapses them onto the newest run.
 - [ ] Hand-off message to the maintainer lists the five org-admin actions in step 9, and says `add-to-project` will stay red until item 5 is done.

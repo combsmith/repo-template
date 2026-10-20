@@ -22,7 +22,7 @@ verification checks, and the short list of org-admin steps a human finishes.
 | Dependabot | `.github/dependabot.yml` | `frontend` stack by default; swap for yours |
 | Baseline files | `CODEOWNERS`, `AGENTS.md`, `CLAUDE.md`, `SECURITY.md`, `LICENSE`, `.gitignore` (secrets baseline), `.gitleaks.toml`, `sonar-project.properties`, `copilot-instructions.md` | Docs and Sonar key need the project's name |
 | Repo settings, rulesets, labels, GHAS | not files | Applied by `bootstrap-new-repo.sh` in `combsmith/.github` (org admin) |
-| Initiatives board (`add-to-project`) | stub only | Red until an org admin grants the repo the `INITIATIVES_APP_*` org secrets (selected visibility) |
+| Initiatives board (`add-to-project`) | stub only | Red until an org admin both grants the repo the `INITIATIVES_APP_*` org secrets (selected visibility) and adds it to the `combsmith-planner` app installation |
 
 The workflow stubs and baseline files here are a distribution artifact of the org
 standards in [`combsmith/.github`](https://github.com/combsmith/.github)
