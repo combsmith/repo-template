@@ -104,3 +104,8 @@ first_line() {
 @test ".gitleaks.toml declares an allowlist section" {
   grep -qE '^\[allowlist\]' "$GITLEAKS_TOML"
 }
+
+@test ".gitleaks.toml enables the default ruleset" {
+  grep -qE '^\[extend\]' "$GITLEAKS_TOML"
+  grep -qE '^useDefault = true' "$GITLEAKS_TOML"
+}
