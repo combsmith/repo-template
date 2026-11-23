@@ -412,7 +412,7 @@ because the CodeQL and check-suite-preference reads return 404 otherwise.
 - [ ] `README.md`, `AGENTS.md`, `copilot-instructions.md` describe this repo; language instruction files copied and listed.
 - [ ] `tests/*.bats` and `standards/` removed (step 8 exception aside).
 - [ ] No stub listed under *Keep verbatim* has a diff.
-- [ ] The bootstrap PR is green on `build-and-test`, `Secret scan (gitleaks)`, `coverage`, `SonarCloud`, `CodeQL`, `agent-shield / AgentShield`, `dependency-audit / Detect ecosystems`, and on the stack's own audit job (`dependency-audit / pip-audit`, `npm audit`, `govulncheck` or `cargo audit`). `dev-lead / *` jobs showing *cancelled* is normal: a burst of review events collapses them onto the newest run.
+- [ ] The bootstrap PR is green on `build-and-test`, `Secret scan (gitleaks)`, `coverage`, `SonarCloud`, `CodeQL`, `agent-shield / AgentShield`, `dependency-audit / Audit gate`, and on the stack's own audit job (`dependency-audit / pip-audit`, `npm audit`, `govulncheck` or `cargo audit`). `dev-lead / *` jobs showing *cancelled* is normal: a burst of review events collapses them onto the newest run.
 - [ ] Hand-off message to the maintainer lists the five org-admin actions in step 9, and says `add-to-project` will stay red until item 5 is done.
 - [ ] Last action: `git rm BOOTSTRAP.md` and commit, once every item above is checked.
 
