@@ -34,10 +34,9 @@ STUB="${BATS_TEST_DIRNAME}/../.github/workflows/dependency-audit.yml"
   # (combsmith/.github/standards/workflows/dependency-audit.yml) changes.
   local canon
   canon="$(mktemp)"
-  # The committed stub has NO trailing newline, so emit the heredoc with its
-  # trailing newline stripped (printf '%s') to stay byte-faithful to the
-  # committed, production stub that the fleet stub-drift monitor compares SHAs against.
-  printf '%s' "$(cat << 'CANONICAL'
+  # The committed stub ends with a single trailing newline; the heredoc keeps it
+  # so the comparison stays byte-faithful to the synced template.
+  cat > "$canon" << 'CANONICAL'
 # ─────────────────────────────────────────────────────────────────────────────
 # SOURCE OF TRUTH: combsmith/.github/standards/workflows/dependency-audit.yml
 # Standard:        combsmith/.github/standards/ci-standards.md#7-dependency-audit-dependency-audityml
@@ -77,7 +76,6 @@ jobs:
   dependency-audit:
     uses: combsmith/.github/.github/workflows/dependency-audit-reusable.yml@dependency-audit/v2-stable  # NOSONAR(githubactions:S7637) first-party channel ref
 CANONICAL
-)" > "$canon"
   run diff -u "$canon" "$STUB"
   rm -f "$canon"
   [ "$status" -eq 0 ] || {
