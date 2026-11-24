@@ -104,3 +104,15 @@ first_line() {
 @test ".gitleaks.toml declares an allowlist section" {
   grep -qE '^\[allowlist\]' "$GITLEAKS_TOML"
 }
+
+@test ".gitleaks.toml enables the default ruleset" {
+  grep -qE '^\[extend\]' "$GITLEAKS_TOML"
+  grep -qE '^useDefault = true' "$GITLEAKS_TOML"
+  # useDefault must live inside the [extend] table, not a later one (e.g. [allowlist]).
+  # TOML permits indented table headers and keys, so tolerate leading/trailing whitespace.
+  run awk '
+    /^[[:space:]]*\[/ { t = $0; sub(/^[[:space:]]+/, "", t); sub(/[[:space:]]*(#.*)?$/, "", t) }
+    /^[[:space:]]*useDefault[[:space:]]*=[[:space:]]*true/ { print t }
+  ' "$GITLEAKS_TOML"
+  [ "$output" = "[extend]" ]
+}
